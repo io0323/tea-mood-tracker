@@ -33,6 +33,7 @@ class TeaMoodViewModelFactory(
       modelClass.isAssignableFrom(HistoryViewModel::class.java) -> {
         HistoryViewModel(
           getAllLogsUseCase = container.getAllLogsUseCase,
+          deleteTeaLogUseCase = container.deleteTeaLogUseCase,
           getWeeklyCaffeineUseCase = container.getWeeklyCaffeineUseCase
         ) as T
       }

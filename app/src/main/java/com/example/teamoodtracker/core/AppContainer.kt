@@ -3,6 +3,7 @@ package com.example.teamoodtracker.core
 import com.example.teamoodtracker.data.repository.InMemoryTeaLogRepository
 import com.example.teamoodtracker.data.repository.TeaLogRepository
 import com.example.teamoodtracker.domain.usecase.AddTeaLogUseCase
+import com.example.teamoodtracker.domain.usecase.DeleteTeaLogUseCase
 import com.example.teamoodtracker.domain.usecase.GetAllLogsUseCase
 import com.example.teamoodtracker.domain.usecase.GetTodayLogsUseCase
 import com.example.teamoodtracker.domain.usecase.GetWeeklyCaffeineUseCase
@@ -15,5 +16,6 @@ class AppContainer {
   val getAllLogsUseCase = GetAllLogsUseCase(teaLogRepository)
   val getTodayLogsUseCase = GetTodayLogsUseCase(teaLogRepository)
   val addTeaLogUseCase = AddTeaLogUseCase(teaLogRepository)
+  val deleteTeaLogUseCase = DeleteTeaLogUseCase(teaLogRepository)
   val getWeeklyCaffeineUseCase = GetWeeklyCaffeineUseCase()
 }

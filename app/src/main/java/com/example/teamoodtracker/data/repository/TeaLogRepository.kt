@@ -22,4 +22,9 @@ interface TeaLogRepository {
    * Add a new tea log.
    */
   fun addLog(log: TeaLog)
+
+  /*
+   * Delete a log by id.
+   */
+  fun deleteLog(logId: String)
 }

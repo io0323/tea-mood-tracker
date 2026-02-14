@@ -12,11 +12,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,14 +42,32 @@ import java.util.Locale
 @Composable
 fun HistoryRoute(viewModel: HistoryViewModel) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-  HistoryScreen(uiState = uiState)
+  HistoryScreen(
+    uiState = uiState,
+    onDeleteLog = viewModel::deleteLog
+  )
 }
 
 /*
  * Main history UI including graph and list.
  */
 @Composable
-fun HistoryScreen(uiState: HistoryUiState) {
+fun HistoryScreen(
+  uiState: HistoryUiState,
+  onDeleteLog: (String) -> Unit
+) {
+  var pendingDeleteLogId by remember { mutableStateOf<String?>(null) }
+
+  if (pendingDeleteLogId != null) {
+    DeleteConfirmDialog(
+      onConfirm = {
+        pendingDeleteLogId?.let { onDeleteLog(it) }
+        pendingDeleteLogId = null
+      },
+      onDismiss = { pendingDeleteLogId = null }
+    )
+  }
+
   if (!uiState.isLoading && uiState.logs.isEmpty()) {
     EmptyState()
     return
@@ -60,9 +87,38 @@ fun HistoryScreen(uiState: HistoryUiState) {
       WeeklyCaffeineCard(weekly = uiState.weeklyCaffeine)
     }
     items(uiState.logs) { log ->
-      LogRow(log = log)
+      LogRow(
+        log = log,
+        isDeleting = uiState.deletingLogId == log.id,
+        onDeleteRequested = { pendingDeleteLogId = log.id }
+      )
     }
   }
+}
+
+/*
+ * Confirmation dialog before log deletion.
+ */
+@Composable
+private fun DeleteConfirmDialog(
+  onConfirm: () -> Unit,
+  onDismiss: () -> Unit
+) {
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = { Text("Delete log?") },
+    text = { Text("This action cannot be undone.") },
+    confirmButton = {
+      TextButton(onClick = onConfirm) {
+        Text("Delete")
+      }
+    },
+    dismissButton = {
+      TextButton(onClick = onDismiss) {
+        Text("Cancel")
+      }
+    }
+  )
 }
 
 /*
@@ -138,7 +194,11 @@ private fun WeeklyCaffeineCard(weekly: LinkedHashMap<LocalDate, Int>) {
  * Single log row item.
  */
 @Composable
-private fun LogRow(log: TeaLog) {
+private fun LogRow(
+  log: TeaLog,
+  isDeleting: Boolean,
+  onDeleteRequested: () -> Unit
+) {
   val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
   Card {
     Row(
@@ -158,10 +218,24 @@ private fun LogRow(log: TeaLog) {
           style = MaterialTheme.typography.bodyMedium
         )
       }
-      Text(
-        text = "${dateFormat.format(log.date)}\n${log.caffeineAmount}mg",
-        style = MaterialTheme.typography.bodySmall
-      )
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(
+          text = "${dateFormat.format(log.date)}\n${log.caffeineAmount}mg",
+          style = MaterialTheme.typography.bodySmall
+        )
+        IconButton(
+          onClick = onDeleteRequested,
+          enabled = !isDeleting
+        ) {
+          Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete log"
+          )
+        }
+      }
     }
   }
 }
