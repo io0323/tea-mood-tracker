@@ -9,5 +9,6 @@ import java.time.LocalDate
 data class HistoryUiState(
   val isLoading: Boolean = true,
   val logs: List<TeaLog> = emptyList(),
-  val weeklyCaffeine: LinkedHashMap<LocalDate, Int> = linkedMapOf()
+  val weeklyCaffeine: LinkedHashMap<LocalDate, Int> = linkedMapOf(),
+  val deletingLogId: String? = null
 )

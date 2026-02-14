@@ -36,6 +36,15 @@ class InMemoryTeaLogRepository : TeaLogRepository {
   }
 
   /*
+   * Remove one log by id and keep ordering stable.
+   */
+  override fun deleteLog(logId: String) {
+    logsState.value = logsState.value
+      .filterNot { it.id == logId }
+      .sortedByDescending { it.date }
+  }
+
+  /*
    * Seed data for initial UI verification.
    */
   private fun seedLogs(): List<TeaLog> {
