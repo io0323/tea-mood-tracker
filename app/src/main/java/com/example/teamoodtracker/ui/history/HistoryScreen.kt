@@ -1,6 +1,8 @@
 package com.example.teamoodtracker.ui.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.teamoodtracker.data.model.Mood
 import com.example.teamoodtracker.data.model.TeaLog
+import com.example.teamoodtracker.data.model.TimeOfDay
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -44,7 +49,10 @@ fun HistoryRoute(viewModel: HistoryViewModel) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   HistoryScreen(
     uiState = uiState,
-    onDeleteLog = viewModel::deleteLog
+    onDeleteLog = viewModel::deleteLog,
+    onMoodFilterChanged = viewModel::setMoodFilter,
+    onTimeFilterChanged = viewModel::setTimeFilter,
+    onClearFilters = viewModel::clearFilters
   )
 }
 
@@ -54,7 +62,10 @@ fun HistoryRoute(viewModel: HistoryViewModel) {
 @Composable
 fun HistoryScreen(
   uiState: HistoryUiState,
-  onDeleteLog: (String) -> Unit
+  onDeleteLog: (String) -> Unit,
+  onMoodFilterChanged: (Mood?) -> Unit,
+  onTimeFilterChanged: (TimeOfDay?) -> Unit,
+  onClearFilters: () -> Unit
 ) {
   var pendingDeleteLogId by remember { mutableStateOf<String?>(null) }
 
@@ -68,8 +79,19 @@ fun HistoryScreen(
     )
   }
 
-  if (!uiState.isLoading && uiState.logs.isEmpty()) {
-    EmptyState()
+  if (!uiState.isLoading && uiState.logs.isEmpty() && uiState.totalLogCount == 0) {
+    EmptyState(
+      title = "No logs yet.",
+      body = "Add your first tea mood record."
+    )
+    return
+  }
+
+  if (!uiState.isLoading && uiState.logs.isEmpty() && uiState.totalLogCount > 0) {
+    EmptyState(
+      title = "No matching logs.",
+      body = "Try changing or clearing filters."
+    )
     return
   }
 
@@ -85,6 +107,17 @@ fun HistoryScreen(
     }
     item {
       WeeklyCaffeineCard(weekly = uiState.weeklyCaffeine)
+    }
+    item {
+      HistoryFilterSection(
+        selectedMood = uiState.selectedMoodFilter,
+        selectedTime = uiState.selectedTimeFilter,
+        currentCount = uiState.logs.size,
+        totalCount = uiState.totalLogCount,
+        onMoodFilterChanged = onMoodFilterChanged,
+        onTimeFilterChanged = onTimeFilterChanged,
+        onClearFilters = onClearFilters
+      )
     }
     items(uiState.logs) { log ->
       LogRow(
@@ -122,10 +155,13 @@ private fun DeleteConfirmDialog(
 }
 
 /*
- * Empty state for no logs.
+ * Empty state for no logs or no filter matches.
  */
 @Composable
-private fun EmptyState() {
+private fun EmptyState(
+  title: String,
+  body: String
+) {
   Box(
     modifier = Modifier
       .fillMaxWidth()
@@ -133,9 +169,91 @@ private fun EmptyState() {
     contentAlignment = Alignment.Center
   ) {
     Text(
-      text = "No logs yet.\nAdd your first tea mood record.",
+      text = "$title\n$body",
       style = MaterialTheme.typography.titleMedium
     )
+  }
+}
+
+/*
+ * Filter chips for mood and time ranges.
+ */
+@Composable
+@OptIn(ExperimentalLayoutApi::class)
+private fun HistoryFilterSection(
+  selectedMood: Mood?,
+  selectedTime: TimeOfDay?,
+  currentCount: Int,
+  totalCount: Int,
+  onMoodFilterChanged: (Mood?) -> Unit,
+  onTimeFilterChanged: (TimeOfDay?) -> Unit,
+  onClearFilters: () -> Unit
+) {
+  Card {
+    Column(
+      modifier = Modifier.padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(
+          text = "Filters",
+          style = MaterialTheme.typography.titleMedium
+        )
+        TextButton(onClick = onClearFilters) {
+          Text("Clear")
+        }
+      }
+      Text(
+        text = "Mood",
+        style = MaterialTheme.typography.labelLarge
+      )
+      FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        FilterChip(
+          selected = selectedMood == null,
+          onClick = { onMoodFilterChanged(null) },
+          label = { Text("All") }
+        )
+        Mood.entries.forEach { mood ->
+          FilterChip(
+            selected = selectedMood == mood,
+            onClick = { onMoodFilterChanged(mood) },
+            label = { Text("${mood.emoji} ${mood.label}") }
+          )
+        }
+      }
+      Text(
+        text = "Time",
+        style = MaterialTheme.typography.labelLarge
+      )
+      FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        FilterChip(
+          selected = selectedTime == null,
+          onClick = { onTimeFilterChanged(null) },
+          label = { Text("All") }
+        )
+        TimeOfDay.entries.forEach { time ->
+          FilterChip(
+            selected = selectedTime == time,
+            onClick = { onTimeFilterChanged(time) },
+            label = { Text(time.label) }
+          )
+        }
+      }
+      Text(
+        text = "Showing $currentCount / $totalCount logs",
+        style = MaterialTheme.typography.bodySmall
+      )
+    }
   }
 }
 

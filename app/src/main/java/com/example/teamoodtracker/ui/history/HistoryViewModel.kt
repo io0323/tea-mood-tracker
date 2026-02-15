@@ -2,6 +2,9 @@ package com.example.teamoodtracker.ui.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.teamoodtracker.data.model.Mood
+import com.example.teamoodtracker.data.model.TeaLog
+import com.example.teamoodtracker.data.model.TimeOfDay
 import com.example.teamoodtracker.domain.usecase.DeleteTeaLogUseCase
 import com.example.teamoodtracker.domain.usecase.GetAllLogsUseCase
 import com.example.teamoodtracker.domain.usecase.GetWeeklyCaffeineUseCase
@@ -19,6 +22,7 @@ class HistoryViewModel(
   private val deleteTeaLogUseCase: DeleteTeaLogUseCase,
   private val getWeeklyCaffeineUseCase: GetWeeklyCaffeineUseCase
 ) : ViewModel() {
+  private var allLogsCache: List<TeaLog> = emptyList()
   private val _uiState = MutableStateFlow(HistoryUiState())
   val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
 
@@ -32,13 +36,8 @@ class HistoryViewModel(
   private fun observeLogs() {
     viewModelScope.launch {
       getAllLogsUseCase().collect { logs ->
-        _uiState.update { current ->
-          current.copy(
-            isLoading = false,
-            logs = logs.sortedByDescending { it.date },
-            weeklyCaffeine = getWeeklyCaffeineUseCase(logs)
-          )
-        }
+        allLogsCache = logs
+        recalculateFilteredState()
       }
     }
   }
@@ -50,5 +49,59 @@ class HistoryViewModel(
     _uiState.update { it.copy(deletingLogId = logId) }
     deleteTeaLogUseCase(logId)
     _uiState.update { it.copy(deletingLogId = null) }
+  }
+
+  /*
+   * Update mood filter and rebuild derived state.
+   */
+  fun setMoodFilter(mood: Mood?) {
+    _uiState.update { it.copy(selectedMoodFilter = mood) }
+    recalculateFilteredState()
+  }
+
+  /*
+   * Update time filter and rebuild derived state.
+   */
+  fun setTimeFilter(timeOfDay: TimeOfDay?) {
+    _uiState.update { it.copy(selectedTimeFilter = timeOfDay) }
+    recalculateFilteredState()
+  }
+
+  /*
+   * Reset all active history filters.
+   */
+  fun clearFilters() {
+    _uiState.update {
+      it.copy(
+        selectedMoodFilter = null,
+        selectedTimeFilter = null
+      )
+    }
+    recalculateFilteredState()
+  }
+
+  /*
+   * Rebuild filtered list and weekly values from cached logs.
+   */
+  private fun recalculateFilteredState() {
+    val current = _uiState.value
+    val filtered = allLogsCache
+      .filter { log ->
+        val moodOk = current.selectedMoodFilter?.let { it == log.mood } ?: true
+        val timeOk = current.selectedTimeFilter?.let {
+          it == log.timeOfDay
+        } ?: true
+        moodOk && timeOk
+      }
+      .sortedByDescending { it.date }
+
+    _uiState.update {
+      it.copy(
+        isLoading = false,
+        logs = filtered,
+        weeklyCaffeine = getWeeklyCaffeineUseCase(filtered),
+        totalLogCount = allLogsCache.size
+      )
+    }
   }
 }
