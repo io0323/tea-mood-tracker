@@ -1,6 +1,9 @@
 package com.example.teamoodtracker.ui.add
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +27,7 @@ import com.example.teamoodtracker.data.model.Mood
 import com.example.teamoodtracker.data.model.TeaType
 import com.example.teamoodtracker.data.model.TimeOfDay
 import com.example.teamoodtracker.ui.common.toAccentColor
+import kotlinx.coroutines.delay
 
 /*
  * Route composable for the Add Log screen.
@@ -35,6 +41,7 @@ fun AddLogRoute(
 
   LaunchedEffect(uiState.isSaved) {
     if (uiState.isSaved) {
+      delay(700)
       onSaved()
       viewModel.consumeSavedEvent()
     }
@@ -77,6 +84,25 @@ fun AddLogScreen(
       )
     }
     item {
+      AnimatedVisibility(
+        visible = uiState.isSaved,
+        enter = fadeIn(),
+        exit = fadeOut()
+      ) {
+        Card(
+          colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+          )
+        ) {
+          Text(
+            modifier = Modifier.padding(14.dp),
+            text = "Saved successfully. Returning...",
+            style = MaterialTheme.typography.bodyMedium
+          )
+        }
+      }
+    }
+    item {
       SelectionSection(
         title = "Mood",
         background = bgColor,
@@ -109,11 +135,18 @@ fun AddLogScreen(
     item {
       Button(
         onClick = onSaveClicked,
+        enabled = !uiState.isSaving && !uiState.isSaved,
         modifier = Modifier
           .fillMaxWidth()
           .padding(top = 6.dp)
       ) {
-        Text(text = "Save")
+        Text(
+          text = when {
+            uiState.isSaving -> "Saving..."
+            uiState.isSaved -> "Saved"
+            else -> "Save"
+          }
+        )
       }
     }
   }

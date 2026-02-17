@@ -11,5 +11,6 @@ data class AddLogUiState(
   val selectedMood: Mood = Mood.CALM,
   val selectedTeaType: TeaType = TeaType.GREEN_TEA,
   val selectedTimeOfDay: TimeOfDay = TimeOfDay.MORNING,
-  val isSaved: Boolean = false
+  val isSaved: Boolean = false,
+  val isSaving: Boolean = false
 )
