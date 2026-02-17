@@ -45,6 +45,10 @@ class AddLogViewModel(
    * Save selected values into a log record.
    */
   fun saveLog() {
+    if (_uiState.value.isSaving || _uiState.value.isSaved) {
+      return
+    }
+    _uiState.value = _uiState.value.copy(isSaving = true)
     val current = _uiState.value
     addTeaLogUseCase(
       TeaLog(
@@ -55,13 +59,19 @@ class AddLogViewModel(
         caffeineAmount = current.selectedTeaType.caffeineMg
       )
     )
-    _uiState.value = current.copy(isSaved = true)
+    _uiState.value = current.copy(
+      isSaving = false,
+      isSaved = true
+    )
   }
 
   /*
    * Reset one-shot save flag after handling.
    */
   fun consumeSavedEvent() {
-    _uiState.value = _uiState.value.copy(isSaved = false)
+    _uiState.value = _uiState.value.copy(
+      isSaved = false,
+      isSaving = false
+    )
   }
 }
