@@ -2,12 +2,15 @@ package com.example.teamoodtracker.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -19,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.teamoodtracker.data.model.TimeOfDay
 import com.example.teamoodtracker.ui.common.toAccentColor
 
 /*
@@ -70,7 +74,54 @@ fun HomeScreen(uiState: HomeUiState) {
     }
 
     item {
+      TodayCountCard(
+        logsCountToday = uiState.logsCountToday,
+        timeOfDayCount = uiState.timeOfDayCount
+      )
+    }
+
+    item {
       CaffeineCard(caffeineTodayMg = uiState.caffeineTodayMg)
+    }
+  }
+}
+
+/*
+ * Card showing total logs and time-bucket summary.
+ */
+@Composable
+@OptIn(ExperimentalLayoutApi::class)
+private fun TodayCountCard(
+  logsCountToday: Int,
+  timeOfDayCount: Map<TimeOfDay, Int>
+) {
+  Card {
+    Column(
+      modifier = Modifier.padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Text(
+        text = "Today's Records",
+        style = MaterialTheme.typography.titleMedium
+      )
+      Text(
+        text = "$logsCountToday logs",
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.SemiBold
+      )
+      FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        TimeOfDay.entries.forEach { time ->
+          val count = timeOfDayCount[time] ?: 0
+          AssistChip(
+            onClick = {},
+            enabled = false,
+            label = { Text("${time.label}: $count") }
+          )
+        }
+      }
     }
   }
 }

@@ -2,6 +2,7 @@ package com.example.teamoodtracker.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.teamoodtracker.data.model.TimeOfDay
 import com.example.teamoodtracker.domain.usecase.GetAllLogsUseCase
 import com.example.teamoodtracker.domain.usecase.GetTodayLogsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,13 +34,19 @@ class HomeViewModel(
         val dominantMood = todayLogs.lastOrNull()?.mood
         val teasToday = todayLogs.map { log -> log.teaType }
         val caffeine = todayLogs.sumOf { log -> log.caffeineAmount }
+        val logsCount = todayLogs.size
+        val timeCounts = TimeOfDay.entries.associateWith { bucket ->
+          todayLogs.count { log -> log.timeOfDay == bucket }
+        }
 
         _uiState.value = HomeUiState(
           isLoading = false,
           todayLogs = todayLogs,
           dominantMood = dominantMood,
           teasToday = teasToday,
-          caffeineTodayMg = caffeine
+          caffeineTodayMg = caffeine,
+          logsCountToday = logsCount,
+          timeOfDayCount = timeCounts
         )
       }
     }
