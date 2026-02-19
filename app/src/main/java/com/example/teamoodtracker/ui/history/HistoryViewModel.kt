@@ -81,11 +81,19 @@ class HistoryViewModel(
   }
 
   /*
+   * Update sort order and rebuild derived state.
+   */
+  fun setSortOrder(sortOrder: HistorySortOrder) {
+    _uiState.update { it.copy(selectedSortOrder = sortOrder) }
+    recalculateFilteredState()
+  }
+
+  /*
    * Rebuild filtered list and weekly values from cached logs.
    */
   private fun recalculateFilteredState() {
     val current = _uiState.value
-    val filtered = allLogsCache
+    val filteredBase = allLogsCache
       .filter { log ->
         val moodOk = current.selectedMoodFilter?.let { it == log.mood } ?: true
         val timeOk = current.selectedTimeFilter?.let {
@@ -93,7 +101,10 @@ class HistoryViewModel(
         } ?: true
         moodOk && timeOk
       }
-      .sortedByDescending { it.date }
+    val filtered = when (current.selectedSortOrder) {
+      HistorySortOrder.NEWEST -> filteredBase.sortedByDescending { it.date }
+      HistorySortOrder.OLDEST -> filteredBase.sortedBy { it.date }
+    }
 
     _uiState.update {
       it.copy(

@@ -52,6 +52,7 @@ fun HistoryRoute(viewModel: HistoryViewModel) {
     onDeleteLog = viewModel::deleteLog,
     onMoodFilterChanged = viewModel::setMoodFilter,
     onTimeFilterChanged = viewModel::setTimeFilter,
+    onSortOrderChanged = viewModel::setSortOrder,
     onClearFilters = viewModel::clearFilters
   )
 }
@@ -65,6 +66,7 @@ fun HistoryScreen(
   onDeleteLog: (String) -> Unit,
   onMoodFilterChanged: (Mood?) -> Unit,
   onTimeFilterChanged: (TimeOfDay?) -> Unit,
+  onSortOrderChanged: (HistorySortOrder) -> Unit,
   onClearFilters: () -> Unit
 ) {
   var pendingDeleteLogId by remember { mutableStateOf<String?>(null) }
@@ -112,10 +114,12 @@ fun HistoryScreen(
       HistoryFilterSection(
         selectedMood = uiState.selectedMoodFilter,
         selectedTime = uiState.selectedTimeFilter,
+        selectedSortOrder = uiState.selectedSortOrder,
         currentCount = uiState.logs.size,
         totalCount = uiState.totalLogCount,
         onMoodFilterChanged = onMoodFilterChanged,
         onTimeFilterChanged = onTimeFilterChanged,
+        onSortOrderChanged = onSortOrderChanged,
         onClearFilters = onClearFilters
       )
     }
@@ -183,10 +187,12 @@ private fun EmptyState(
 private fun HistoryFilterSection(
   selectedMood: Mood?,
   selectedTime: TimeOfDay?,
+  selectedSortOrder: HistorySortOrder,
   currentCount: Int,
   totalCount: Int,
   onMoodFilterChanged: (Mood?) -> Unit,
   onTimeFilterChanged: (TimeOfDay?) -> Unit,
+  onSortOrderChanged: (HistorySortOrder) -> Unit,
   onClearFilters: () -> Unit
 ) {
   Card {
@@ -246,6 +252,22 @@ private fun HistoryFilterSection(
             selected = selectedTime == time,
             onClick = { onTimeFilterChanged(time) },
             label = { Text(time.label) }
+          )
+        }
+      }
+      Text(
+        text = "Sort",
+        style = MaterialTheme.typography.labelLarge
+      )
+      FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        HistorySortOrder.entries.forEach { order ->
+          FilterChip(
+            selected = selectedSortOrder == order,
+            onClick = { onSortOrderChanged(order) },
+            label = { Text(order.label) }
           )
         }
       }
