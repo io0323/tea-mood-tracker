@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,7 +55,8 @@ fun AddLogRoute(
     onMoodSelected = viewModel::onMoodSelected,
     onTeaSelected = viewModel::onTeaSelected,
     onTimeOfDaySelected = viewModel::onTimeOfDaySelected,
-    onSaveClicked = viewModel::saveLog
+    onSaveClicked = viewModel::saveLog,
+    onResetClicked = viewModel::resetSelections
   )
 }
 
@@ -65,8 +69,13 @@ fun AddLogScreen(
   onMoodSelected: (Mood) -> Unit,
   onTeaSelected: (TeaType) -> Unit,
   onTimeOfDaySelected: (TimeOfDay) -> Unit,
-  onSaveClicked: () -> Unit
+  onSaveClicked: () -> Unit,
+  onResetClicked: () -> Unit
 ) {
+  val canReset = uiState.selectedMood != Mood.CALM
+    || uiState.selectedTeaType != TeaType.GREEN_TEA
+    || uiState.selectedTimeOfDay != TimeOfDay.MORNING
+
   val bgColor by animateColorAsState(
     targetValue = uiState.selectedMood.toAccentColor().copy(alpha = 0.12f),
     label = "mood_bg"
@@ -133,20 +142,32 @@ fun AddLogScreen(
       )
     }
     item {
-      Button(
-        onClick = onSaveClicked,
-        enabled = !uiState.isSaving && !uiState.isSaved,
+      Row(
         modifier = Modifier
           .fillMaxWidth()
-          .padding(top = 6.dp)
+          .padding(top = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
       ) {
-        Text(
-          text = when {
-            uiState.isSaving -> "Saving..."
-            uiState.isSaved -> "Saved"
-            else -> "Save"
-          }
-        )
+        OutlinedButton(
+          onClick = onResetClicked,
+          enabled = canReset && !uiState.isSaving,
+          modifier = Modifier.weight(1f)
+        ) {
+          Text(text = "Reset")
+        }
+        Button(
+          onClick = onSaveClicked,
+          enabled = !uiState.isSaving && !uiState.isSaved,
+          modifier = Modifier.weight(1f)
+        ) {
+          Text(
+            text = when {
+              uiState.isSaving -> "Saving..."
+              uiState.isSaved -> "Saved"
+              else -> "Save"
+            }
+          )
+        }
       }
     }
   }
