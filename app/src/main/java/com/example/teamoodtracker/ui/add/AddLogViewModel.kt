@@ -17,6 +17,12 @@ import java.time.LocalDate
 class AddLogViewModel(
   private val addTeaLogUseCase: AddTeaLogUseCase
 ) : ViewModel() {
+  companion object {
+    private val defaultMood = Mood.CALM
+    private val defaultTea = TeaType.GREEN_TEA
+    private val defaultTime = TimeOfDay.MORNING
+  }
+
   private val _uiState = MutableStateFlow(AddLogUiState())
   val uiState: StateFlow<AddLogUiState> = _uiState.asStateFlow()
 
@@ -70,6 +76,22 @@ class AddLogViewModel(
    */
   fun consumeSavedEvent() {
     _uiState.value = _uiState.value.copy(
+      isSaved = false,
+      isSaving = false
+    )
+  }
+
+  /*
+   * Reset all selection inputs to default values.
+   */
+  fun resetSelections() {
+    if (_uiState.value.isSaving) {
+      return
+    }
+    _uiState.value = _uiState.value.copy(
+      selectedMood = defaultMood,
+      selectedTeaType = defaultTea,
+      selectedTimeOfDay = defaultTime,
       isSaved = false,
       isSaving = false
     )
