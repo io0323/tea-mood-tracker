@@ -17,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -142,6 +143,13 @@ fun AddLogScreen(
       )
     }
     item {
+      AddLogPreviewCard(
+        mood = uiState.selectedMood,
+        teaType = uiState.selectedTeaType,
+        timeOfDay = uiState.selectedTimeOfDay
+      )
+    }
+    item {
       Row(
         modifier = Modifier
           .fillMaxWidth()
@@ -169,6 +177,56 @@ fun AddLogScreen(
           )
         }
       }
+    }
+  }
+}
+
+/*
+ * Live preview card for current Add Log selections.
+ */
+@Composable
+private fun AddLogPreviewCard(
+  mood: Mood,
+  teaType: TeaType,
+  timeOfDay: TimeOfDay
+) {
+  val caffeine = teaType.caffeineMg
+  val progress = (caffeine / 60f).coerceIn(0f, 1f)
+  val caffeineMessage = when {
+    caffeine >= 45 -> "High caffeine profile"
+    caffeine >= 25 -> "Moderate caffeine profile"
+    else -> "Low caffeine profile"
+  }
+
+  Card(
+    colors = CardDefaults.cardColors(
+      containerColor = MaterialTheme.colorScheme.secondaryContainer
+    )
+  ) {
+    Column(
+      modifier = Modifier.padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Text(
+        text = "Live Preview",
+        style = MaterialTheme.typography.titleMedium
+      )
+      Text(
+        text = "${mood.emoji} ${mood.label} • ${teaType.label} • ${timeOfDay.label}",
+        style = MaterialTheme.typography.bodyMedium
+      )
+      Text(
+        text = "Estimated caffeine: ${caffeine}mg",
+        style = MaterialTheme.typography.bodySmall
+      )
+      LinearProgressIndicator(
+        progress = { progress },
+        modifier = Modifier.fillMaxWidth()
+      )
+      Text(
+        text = caffeineMessage,
+        style = MaterialTheme.typography.labelMedium
+      )
     }
   }
 }
