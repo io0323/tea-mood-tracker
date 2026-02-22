@@ -83,6 +83,12 @@ fun HomeScreen(uiState: HomeUiState) {
     item {
       CaffeineCard(caffeineTodayMg = uiState.caffeineTodayMg)
     }
+    item {
+      WeeklyCaffeineSummaryCard(
+        weeklyTotalMg = uiState.weeklyCaffeineTotalMg,
+        weeklyAverageMg = uiState.weeklyCaffeineAverageMg
+      )
+    }
   }
 }
 
@@ -208,6 +214,57 @@ private fun CaffeineCard(caffeineTodayMg: Int) {
         progress = { progress },
         modifier = Modifier.fillMaxWidth()
       )
+    }
+  }
+}
+
+/*
+ * Card showing total and average caffeine for last week.
+ */
+@Composable
+private fun WeeklyCaffeineSummaryCard(
+  weeklyTotalMg: Int,
+  weeklyAverageMg: Int
+) {
+  Card {
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Text(
+        text = "Last 7 Days",
+        style = MaterialTheme.typography.titleMedium
+      )
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Text(
+          text = "Total caffeine",
+          style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+          text = "${weeklyTotalMg}mg",
+          style = MaterialTheme.typography.bodyMedium,
+          fontWeight = FontWeight.SemiBold
+        )
+      }
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Text(
+          text = "Daily average",
+          style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+          text = "${weeklyAverageMg}mg/day",
+          style = MaterialTheme.typography.bodyMedium,
+          fontWeight = FontWeight.SemiBold
+        )
+      }
     }
   }
 }

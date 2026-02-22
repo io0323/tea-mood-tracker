@@ -15,5 +15,7 @@ data class HomeUiState(
   val teasToday: List<TeaType> = emptyList(),
   val caffeineTodayMg: Int = 0,
   val logsCountToday: Int = 0,
-  val timeOfDayCount: Map<TimeOfDay, Int> = emptyMap()
+  val timeOfDayCount: Map<TimeOfDay, Int> = emptyMap(),
+  val weeklyCaffeineTotalMg: Int = 0,
+  val weeklyCaffeineAverageMg: Int = 0
 )
