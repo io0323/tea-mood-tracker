@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 /*
  * ViewModel for the Today screen.
@@ -29,7 +30,7 @@ class HomeViewModel(
    */
   private fun observeLogs() {
     viewModelScope.launch {
-      getAllLogsUseCase().collect {
+      getAllLogsUseCase().collect { allLogs ->
         val todayLogs = getTodayLogsUseCase()
         val dominantMood = todayLogs.lastOrNull()?.mood
         val teasToday = todayLogs.map { log -> log.teaType }
@@ -38,6 +39,12 @@ class HomeViewModel(
         val timeCounts = TimeOfDay.entries.associateWith { bucket ->
           todayLogs.count { log -> log.timeOfDay == bucket }
         }
+        val today = LocalDate.now()
+        val weekStart = today.minusDays(6)
+        val weeklyTotal = allLogs
+          .filter { log -> log.date in weekStart..today }
+          .sumOf { log -> log.caffeineAmount }
+        val weeklyAverage = weeklyTotal / 7
 
         _uiState.value = HomeUiState(
           isLoading = false,
@@ -46,7 +53,9 @@ class HomeViewModel(
           teasToday = teasToday,
           caffeineTodayMg = caffeine,
           logsCountToday = logsCount,
-          timeOfDayCount = timeCounts
+          timeOfDayCount = timeCounts,
+          weeklyCaffeineTotalMg = weeklyTotal,
+          weeklyCaffeineAverageMg = weeklyAverage
         )
       }
     }
