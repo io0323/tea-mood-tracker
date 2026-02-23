@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 /*
  * ViewModel for history list and weekly graph.
@@ -73,10 +74,19 @@ class HistoryViewModel(
   fun clearFilters() {
     _uiState.update {
       it.copy(
+        isTodayOnly = false,
         selectedMoodFilter = null,
         selectedTimeFilter = null
       )
     }
+    recalculateFilteredState()
+  }
+
+  /*
+   * Toggle quick filter to show only today's logs.
+   */
+  fun setTodayOnly(enabled: Boolean) {
+    _uiState.update { it.copy(isTodayOnly = enabled) }
     recalculateFilteredState()
   }
 
@@ -93,13 +103,19 @@ class HistoryViewModel(
    */
   private fun recalculateFilteredState() {
     val current = _uiState.value
+    val today = LocalDate.now()
     val filteredBase = allLogsCache
       .filter { log ->
+        val todayOnlyOk = if (current.isTodayOnly) {
+          log.date == today
+        } else {
+          true
+        }
         val moodOk = current.selectedMoodFilter?.let { it == log.mood } ?: true
         val timeOk = current.selectedTimeFilter?.let {
           it == log.timeOfDay
         } ?: true
-        moodOk && timeOk
+        todayOnlyOk && moodOk && timeOk
       }
     val filtered = when (current.selectedSortOrder) {
       HistorySortOrder.NEWEST -> filteredBase.sortedByDescending { it.date }
