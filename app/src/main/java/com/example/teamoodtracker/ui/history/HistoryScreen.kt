@@ -50,6 +50,7 @@ fun HistoryRoute(viewModel: HistoryViewModel) {
   HistoryScreen(
     uiState = uiState,
     onDeleteLog = viewModel::deleteLog,
+    onTodayOnlyChanged = viewModel::setTodayOnly,
     onMoodFilterChanged = viewModel::setMoodFilter,
     onTimeFilterChanged = viewModel::setTimeFilter,
     onSortOrderChanged = viewModel::setSortOrder,
@@ -64,6 +65,7 @@ fun HistoryRoute(viewModel: HistoryViewModel) {
 fun HistoryScreen(
   uiState: HistoryUiState,
   onDeleteLog: (String) -> Unit,
+  onTodayOnlyChanged: (Boolean) -> Unit,
   onMoodFilterChanged: (Mood?) -> Unit,
   onTimeFilterChanged: (TimeOfDay?) -> Unit,
   onSortOrderChanged: (HistorySortOrder) -> Unit,
@@ -112,11 +114,13 @@ fun HistoryScreen(
     }
     item {
       HistoryFilterSection(
+        isTodayOnly = uiState.isTodayOnly,
         selectedMood = uiState.selectedMoodFilter,
         selectedTime = uiState.selectedTimeFilter,
         selectedSortOrder = uiState.selectedSortOrder,
         currentCount = uiState.logs.size,
         totalCount = uiState.totalLogCount,
+        onTodayOnlyChanged = onTodayOnlyChanged,
         onMoodFilterChanged = onMoodFilterChanged,
         onTimeFilterChanged = onTimeFilterChanged,
         onSortOrderChanged = onSortOrderChanged,
@@ -185,11 +189,13 @@ private fun EmptyState(
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 private fun HistoryFilterSection(
+  isTodayOnly: Boolean,
   selectedMood: Mood?,
   selectedTime: TimeOfDay?,
   selectedSortOrder: HistorySortOrder,
   currentCount: Int,
   totalCount: Int,
+  onTodayOnlyChanged: (Boolean) -> Unit,
   onMoodFilterChanged: (Mood?) -> Unit,
   onTimeFilterChanged: (TimeOfDay?) -> Unit,
   onSortOrderChanged: (HistorySortOrder) -> Unit,
@@ -212,6 +218,20 @@ private fun HistoryFilterSection(
         TextButton(onClick = onClearFilters) {
           Text("Clear")
         }
+      }
+      Text(
+        text = "Quick",
+        style = MaterialTheme.typography.labelLarge
+      )
+      FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        FilterChip(
+          selected = isTodayOnly,
+          onClick = { onTodayOnlyChanged(!isTodayOnly) },
+          label = { Text("Today only") }
+        )
       }
       Text(
         text = "Mood",
