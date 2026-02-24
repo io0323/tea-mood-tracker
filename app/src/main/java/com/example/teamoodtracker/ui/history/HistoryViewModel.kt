@@ -127,6 +127,7 @@ class HistoryViewModel(
         isLoading = false,
         logs = filtered,
         weeklyCaffeine = getWeeklyCaffeineUseCase(filtered),
+        filteredCaffeineTotalMg = filtered.sumOf { log -> log.caffeineAmount },
         totalLogCount = allLogsCache.size
       )
     }
