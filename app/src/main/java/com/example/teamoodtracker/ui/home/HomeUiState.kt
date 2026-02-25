@@ -13,6 +13,7 @@ data class HomeUiState(
   val todayLogs: List<TeaLog> = emptyList(),
   val dominantMood: Mood? = null,
   val teasToday: List<TeaType> = emptyList(),
+  val teaTypeCountToday: Map<TeaType, Int> = emptyMap(),
   val caffeineTodayMg: Int = 0,
   val logsCountToday: Int = 0,
   val timeOfDayCount: Map<TimeOfDay, Int> = emptyMap(),
