@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.teamoodtracker.data.model.TeaType
 import com.example.teamoodtracker.data.model.TimeOfDay
 import com.example.teamoodtracker.ui.common.toAccentColor
 
@@ -72,6 +73,9 @@ fun HomeScreen(uiState: HomeUiState) {
         teaLabels = uiState.teasToday.map { teaType -> teaType.label }
       )
     }
+    item {
+      TeaBreakdownCard(teaTypeCount = uiState.teaTypeCountToday)
+    }
 
     item {
       TodayCountCard(
@@ -88,6 +92,37 @@ fun HomeScreen(uiState: HomeUiState) {
         weeklyTotalMg = uiState.weeklyCaffeineTotalMg,
         weeklyAverageMg = uiState.weeklyCaffeineAverageMg
       )
+    }
+  }
+}
+
+/*
+ * Card showing tea-type counts for today.
+ */
+@Composable
+@OptIn(ExperimentalLayoutApi::class)
+private fun TeaBreakdownCard(teaTypeCount: Map<TeaType, Int>) {
+  Card {
+    Column(
+      modifier = Modifier.padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Text(
+        text = "Tea Type Breakdown",
+        style = MaterialTheme.typography.titleMedium
+      )
+      FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        TeaType.entries.forEach { type ->
+          AssistChip(
+            onClick = {},
+            enabled = false,
+            label = { Text("${type.label}: ${teaTypeCount[type] ?: 0}") }
+          )
+        }
+      }
     }
   }
 }
