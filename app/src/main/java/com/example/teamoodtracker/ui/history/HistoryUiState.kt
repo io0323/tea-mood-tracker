@@ -21,6 +21,7 @@ data class HistoryUiState(
   val logs: List<TeaLog> = emptyList(),
   val weeklyCaffeine: LinkedHashMap<LocalDate, Int> = linkedMapOf(),
   val filteredCaffeineTotalMg: Int = 0,
+  val activeFilterCount: Int = 0,
   val deletingLogId: String? = null,
   val isTodayOnly: Boolean = false,
   val selectedMoodFilter: Mood? = null,

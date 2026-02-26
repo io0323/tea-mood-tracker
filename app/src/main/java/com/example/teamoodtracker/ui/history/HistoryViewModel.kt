@@ -121,6 +121,12 @@ class HistoryViewModel(
       HistorySortOrder.NEWEST -> filteredBase.sortedByDescending { it.date }
       HistorySortOrder.OLDEST -> filteredBase.sortedBy { it.date }
     }
+    val activeFilterCount = listOf(
+      current.isTodayOnly,
+      current.selectedMoodFilter != null,
+      current.selectedTimeFilter != null,
+      current.selectedSortOrder != HistorySortOrder.NEWEST
+    ).count { it }
 
     _uiState.update {
       it.copy(
@@ -128,6 +134,7 @@ class HistoryViewModel(
         logs = filtered,
         weeklyCaffeine = getWeeklyCaffeineUseCase(filtered),
         filteredCaffeineTotalMg = filtered.sumOf { log -> log.caffeineAmount },
+        activeFilterCount = activeFilterCount,
         totalLogCount = allLogsCache.size
       )
     }
