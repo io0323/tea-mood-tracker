@@ -121,6 +121,7 @@ fun HistoryScreen(
         currentCount = uiState.logs.size,
         totalCount = uiState.totalLogCount,
         filteredCaffeineTotalMg = uiState.filteredCaffeineTotalMg,
+        activeFilterCount = uiState.activeFilterCount,
         onTodayOnlyChanged = onTodayOnlyChanged,
         onMoodFilterChanged = onMoodFilterChanged,
         onTimeFilterChanged = onTimeFilterChanged,
@@ -197,6 +198,7 @@ private fun HistoryFilterSection(
   currentCount: Int,
   totalCount: Int,
   filteredCaffeineTotalMg: Int,
+  activeFilterCount: Int,
   onTodayOnlyChanged: (Boolean) -> Unit,
   onMoodFilterChanged: (Mood?) -> Unit,
   onTimeFilterChanged: (TimeOfDay?) -> Unit,
@@ -295,6 +297,10 @@ private fun HistoryFilterSection(
       }
       Text(
         text = "Showing $currentCount / $totalCount logs",
+        style = MaterialTheme.typography.bodySmall
+      )
+      Text(
+        text = "Active filters: $activeFilterCount",
         style = MaterialTheme.typography.bodySmall
       )
       Text(
