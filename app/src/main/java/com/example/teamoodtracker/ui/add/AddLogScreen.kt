@@ -192,6 +192,7 @@ private fun AddLogPreviewCard(
 ) {
   val caffeine = teaType.caffeineMg
   val progress = (caffeine / 60f).coerceIn(0f, 1f)
+  val shouldWarnLateCaffeine = timeOfDay == TimeOfDay.EVENING && caffeine > 0
   val caffeineMessage = when {
     caffeine >= 45 -> "High caffeine profile"
     caffeine >= 25 -> "Moderate caffeine profile"
@@ -227,6 +228,14 @@ private fun AddLogPreviewCard(
         text = caffeineMessage,
         style = MaterialTheme.typography.labelMedium
       )
+      if (shouldWarnLateCaffeine) {
+        Text(
+          text = "Evening caffeine may affect sleep quality.",
+          style = MaterialTheme.typography.labelMedium,
+          color = MaterialTheme.colorScheme.error,
+          fontWeight = FontWeight.SemiBold
+        )
+      }
     }
   }
 }
