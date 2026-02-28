@@ -219,8 +219,16 @@ private fun HistoryFilterSection(
           text = "Filters",
           style = MaterialTheme.typography.titleMedium
         )
-        TextButton(onClick = onClearFilters) {
-          Text("Clear")
+        TextButton(
+          onClick = onClearFilters,
+          enabled = activeFilterCount > 0
+        ) {
+          val clearLabel = if (activeFilterCount > 0) {
+            "Clear ($activeFilterCount)"
+          } else {
+            "Clear"
+          }
+          Text(clearLabel)
         }
       }
       Text(
