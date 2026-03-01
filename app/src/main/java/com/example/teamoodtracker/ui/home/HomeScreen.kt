@@ -224,6 +224,11 @@ private fun TeaListCard(teaLabels: List<String>) {
 private fun CaffeineCard(caffeineTodayMg: Int) {
   val goal = 200f
   val progress = (caffeineTodayMg / goal).coerceIn(0f, 1f)
+  val statusLabel = when {
+    caffeineTodayMg >= 160 -> "High"
+    caffeineTodayMg >= 80 -> "Moderate"
+    else -> "Low"
+  }
   Card {
     Column(
       modifier = Modifier
@@ -249,6 +254,20 @@ private fun CaffeineCard(caffeineTodayMg: Int) {
         progress = { progress },
         modifier = Modifier.fillMaxWidth()
       )
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Text(
+          text = "Current status",
+          style = MaterialTheme.typography.bodySmall
+        )
+        Text(
+          text = statusLabel,
+          style = MaterialTheme.typography.bodySmall,
+          fontWeight = FontWeight.SemiBold
+        )
+      }
     }
   }
 }
