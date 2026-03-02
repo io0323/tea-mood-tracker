@@ -39,6 +39,7 @@ import com.example.teamoodtracker.data.model.TeaLog
 import com.example.teamoodtracker.data.model.TimeOfDay
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 /*
@@ -380,6 +381,13 @@ private fun LogRow(
   isDeleting: Boolean,
   onDeleteRequested: () -> Unit
 ) {
+  val today = LocalDate.now()
+  val daysDiff = ChronoUnit.DAYS.between(log.date, today).toInt()
+  val relativeLabel = when {
+    daysDiff <= 0 -> "Today"
+    daysDiff == 1 -> "1 day ago"
+    else -> "$daysDiff days ago"
+  }
   val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
   Card {
     Row(
@@ -404,7 +412,7 @@ private fun LogRow(
         verticalAlignment = Alignment.CenterVertically
       ) {
         Text(
-          text = "${dateFormat.format(log.date)}\n${log.caffeineAmount}mg",
+          text = "${dateFormat.format(log.date)}\n$relativeLabel\n${log.caffeineAmount}mg",
           style = MaterialTheme.typography.bodySmall
         )
         IconButton(
