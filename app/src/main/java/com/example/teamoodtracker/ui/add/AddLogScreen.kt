@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -192,6 +193,7 @@ private fun AddLogPreviewCard(
 ) {
   val caffeine = teaType.caffeineMg
   val progress = (caffeine / 60f).coerceIn(0f, 1f)
+  val isCaffeineFree = caffeine == 0
   val shouldWarnLateCaffeine = timeOfDay == TimeOfDay.EVENING && caffeine > 0
   val caffeineMessage = when {
     caffeine >= 45 -> "High caffeine profile"
@@ -220,6 +222,13 @@ private fun AddLogPreviewCard(
         text = "Estimated caffeine: ${caffeine}mg",
         style = MaterialTheme.typography.bodySmall
       )
+      if (isCaffeineFree) {
+        AssistChip(
+          onClick = {},
+          enabled = false,
+          label = { Text("Caffeine-free option") }
+        )
+      }
       LinearProgressIndicator(
         progress = { progress },
         modifier = Modifier.fillMaxWidth()
